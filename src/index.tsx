@@ -1,6 +1,7 @@
 import React from 'react';
 import type { PluginComponentProps } from './hs-plugin';
-import { frame, ink, Header, Icon, I, useNow, fmtTime, dayKey } from './ui';
+import { frame, ink, Header, Icon, I, useNow, fmtTime, dayKey, sdk, localHM } from './ui';
+import { bestWalk, Wx } from './walk';
 
 type Pet = { name: string; jobs: string[] };
 export function parsePets(s: string): Pet[] {
@@ -27,9 +28,29 @@ export default function PetCare({ config, style, timezone: tz, ...rest }: Plugin
   const total = pets.reduce((a, p) => a + p.jobs.length, 0);
   const done = Object.keys(today).length;
 
+  // best time for a dog walk (rest of today, 7 AM–8 PM)
+  const lat = (rest as any).latitude ?? sdk()?.getHostSettings?.()?.latitude;
+  const lon = (rest as any).longitude ?? sdk()?.getHostSettings?.()?.longitude;
+  const [wx, setWx] = React.useState<Wx | null>(null);
+  const wtick = Math.floor(now.getTime() / 1800000);
+  React.useEffect(() => {
+    if (config.showWalk === false || lat == null || lon == null) return;
+    (async () => {
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${Number(lat).toFixed(3)}&longitude=${Number(lon).toFixed(3)}&hourly=apparent_temperature,precipitation_probability,precipitation,wind_speed_10m,weather_code&timezone=${encodeURIComponent(tz || 'America/Toronto')}&forecast_days=2`;
+        const res: Response = await sdk().pluginFetch('pet-care', { url, cacheTtlMs: 1800000 });
+        if (res.ok) setWx((await res.json()).hourly);
+      } catch { /* optional */ }
+    })();
+  }, [lat, lon, wtick]);  // eslint-disable-line react-hooks/exhaustive-deps
+  const walk = wx ? bestWalk(wx, dayKey(now, tz), Math.floor(localHM(now, tz) / 60) + 1, Number(config.walkFrom ?? 7), Number(config.walkTo ?? 20)) : null;
+  const hLabel = (h: number) => fmtTime(new Date(2000, 0, 1, h), undefined, (rest as any).timeFormat).replace(':00', '');
+
   return (
     <div style={frame(style)}>
-      <Header style={style} title={String(config.title || 'Pets')} meta={`${done}/${total} done today`} />
+      <Header style={style} title={String(config.title || 'Pets')} meta={`${done}/${total} done today`}
+        right={walk ? <span style={{ fontSize: '0.7em', fontWeight: 500, padding: '0.25em 0.65em', borderRadius: '999px', background: `color-mix(in srgb, ${accent} 12%, transparent)`, color: accent, whiteSpace: 'nowrap' }}>
+          Best walk {hLabel(walk.hour)} · {Math.round(walk.feels)}°{walk.pop >= 30 ? ` · ${walk.pop}% rain` : ' · dry'}</span> : undefined} />
       {reminders.map((r) => (
         <div key={r} style={{ display: 'flex', alignItems: 'center', gap: '0.5em', padding: '0.45em 0.7em', borderRadius: '0.5em', marginBottom: '0.5em', background: `color-mix(in srgb, ${accent} 12%, transparent)`, color: accent, fontSize: '0.8em', fontWeight: 500 }}>
           <Icon d={I.calendar} size="1.1em" /> Today: {r}
@@ -39,7 +60,7 @@ export default function PetCare({ config, style, timezone: tz, ...rest }: Plugin
         {pets.map((p) => (
           <div key={p.name}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4em', fontSize: '0.8em', fontWeight: 600, marginBottom: '0.4em' }}><Icon d={I.paw} size="1.1em" style={{ opacity: 0.6 }} />{p.name}</div>
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(p.jobs.length, 4)}, 1fr)`, gap: '0.4em' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: "repeat(auto-fill, minmax(6.5em, 1fr))", gap: '0.4em' }}>
               {p.jobs.map((j) => {
                 const k = `${p.name}|${j}`; const at = today[k];
                 return (
