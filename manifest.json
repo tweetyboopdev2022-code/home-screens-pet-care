@@ -1,0 +1,76 @@
+{
+  "id": "pet-care",
+  "name": "Pet Care",
+  "version": "1.0.0",
+  "description": "Tap-to-log daily pet jobs (fed, walked, litter) with the time they were done; resets every morning. Optional monthly reminders.",
+  "author": "Tanya",
+  "license": "MIT",
+  "minAppVersion": "1.7.1",
+  "moduleType": "pet-care",
+  "category": "Personal",
+  "icon": "Heart",
+  "defaultConfig": {
+    "title": "Pets",
+    "pets": "Dog: Breakfast, Walk, Dinner, Evening walk\nCat: Breakfast, Dinner, Litter",
+    "monthly": "Dog flea & heartworm|1",
+    "resetHour": 4,
+    "accentColor": "#0d9488"
+  },
+  "defaultSize": {
+    "w": 1000,
+    "h": 420
+  },
+  "defaultStyle": {
+    "fontSize": 18,
+    "padding": 28,
+    "borderRadius": 28
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string",
+        "title": "Title",
+        "ui:widget": "text",
+        "ui:group": "Content"
+      },
+      "pets": {
+        "type": "string",
+        "title": "Pets and jobs",
+        "ui:widget": "textarea",
+        "ui:group": "Content",
+        "description": "One pet per line: Name: job, job, job"
+      },
+      "monthly": {
+        "type": "string",
+        "title": "Monthly reminders",
+        "ui:widget": "textarea",
+        "ui:group": "Content",
+        "description": "One per line: Reminder|day-of-month"
+      },
+      "resetHour": {
+        "type": "number",
+        "title": "New day starts at (hour)",
+        "ui:widget": "slider",
+        "ui:group": "Content",
+        "minimum": 0,
+        "maximum": 10,
+        "ui:step": 1
+      },
+      "accentColor": {
+        "type": "string",
+        "title": "Accent colour",
+        "ui:widget": "color",
+        "ui:group": "Look"
+      }
+    }
+  },
+  "exports": {
+    "component": "default"
+  },
+  "dataRequirements": [],
+  "prefetchUrl": null,
+  "permissions": [
+    "storage"
+  ]
+}
