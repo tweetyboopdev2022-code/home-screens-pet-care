@@ -48,7 +48,7 @@ export default function PetCare({ config, style, timezone: tz, ...rest }: Plugin
 
   return (
     <div style={frame(style)}>
-      <Header style={style} title={String(config.title || 'Pets')} meta={`${done}/${total} done today`}
+      <Header style={style} title={String(config.title || (pets.length === 1 ? pets[0].name : 'Pets'))} meta={`${done}/${total} done today`}
         right={walk ? <span style={{ fontSize: '0.7em', fontWeight: 500, padding: '0.25em 0.65em', borderRadius: '999px', background: `color-mix(in srgb, ${accent} 12%, transparent)`, color: accent, whiteSpace: 'nowrap' }}>
           Best walk {hLabel(walk.hour)} · {Math.round(walk.feels)}°{walk.pop >= 30 ? ` · ${walk.pop}% rain` : ' · dry'}</span> : undefined} />
       {reminders.map((r) => (
@@ -59,7 +59,7 @@ export default function PetCare({ config, style, timezone: tz, ...rest }: Plugin
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8em', flex: 1, minHeight: 0 }}>
         {pets.map((p) => (
           <div key={p.name}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4em', fontSize: '0.8em', fontWeight: 600, marginBottom: '0.4em' }}><Icon d={I.paw} size="1.1em" style={{ opacity: 0.6 }} />{p.name}</div>
+            {pets.length > 1 && <div style={{ display: 'flex', alignItems: 'center', gap: '0.4em', fontSize: '0.8em', fontWeight: 600, marginBottom: '0.4em' }}><Icon d={I.paw} size="1.1em" style={{ opacity: 0.6 }} />{p.name}</div>}
             <div style={{ display: 'grid', gridTemplateColumns: "repeat(auto-fill, minmax(6.5em, 1fr))", gap: '0.4em' }}>
               {p.jobs.map((j) => {
                 const k = `${p.name}|${j}`; const at = today[k];

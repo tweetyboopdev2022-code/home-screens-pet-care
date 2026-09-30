@@ -1,7 +1,7 @@
 {
   "id": "pet-care",
   "name": "Pet Care",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Tap-to-log daily pet jobs (fed, walked, litter) with the time they were done; resets every morning. Optional monthly reminders.",
   "author": "Tanya",
   "license": "MIT",
